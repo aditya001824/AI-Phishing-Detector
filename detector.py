@@ -2,6 +2,7 @@ import argparse
 import os
 import pickle
 import sys
+from heuristics import analyze_heuristics
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "phishing_model.pkl")
 VECTORIZER_PATH = os.path.join(os.path.dirname(__file__), "vectorizer.pkl")
@@ -23,9 +24,7 @@ def load_artifacts():
 
 def predict_message(text: str, model=None, vectorizer=None):
     """
-    Predict if a text message is phishing or safe.
-    
-    Returns a dict with 'label' ('phishing' or 'safe'), 'is_phishing' bool, and 'confidence' float.
+    Perform hybrid ML + Heuristic prediction on a given text message.
     """
     if not text or not text.strip():
         raise ValueError("Input message cannot be empty.")
@@ -33,26 +32,41 @@ def predict_message(text: str, model=None, vectorizer=None):
     if model is None or vectorizer is None:
         model, vectorizer = load_artifacts()
 
+    # 1. Machine Learning Prediction
     vector = vectorizer.transform([text])
     pred = model.predict(vector)[0]
     
-    # Calculate probability if supported
     confidence = 1.0
     if hasattr(model, "predict_proba"):
         probabilities = model.predict_proba(vector)[0]
         confidence = float(probabilities[pred])
 
-    label = "phishing" if pred == 1 else "safe"
+    # 2. Heuristic Risk Analysis
+    heuristic_results = analyze_heuristics(text)
+
+    # Hybrid escalation: If heuristics detect critical danger (e.g. IP address URL + high urgency)
+    is_phishing = bool(pred == 1)
+    if not is_phishing and heuristic_results["heuristic_score"] >= 65:
+        # Heuristic override for high risk signatures
+        is_phishing = True
+        label = "phishing"
+    else:
+        label = "phishing" if is_phishing else "safe"
+
     return {
         "result": label,
-        "is_phishing": bool(pred == 1),
-        "confidence": round(confidence, 4)
+        "is_phishing": is_phishing,
+        "confidence": round(confidence, 4),
+        "heuristic_score": heuristic_results["heuristic_score"],
+        "risk_level": heuristic_results["risk_level"],
+        "flags": heuristic_results["flags"],
+        "url_analysis": heuristic_results["url_analysis"]
     }
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="AI Phishing Detector - Analyze text and emails for phishing indicators."
+        description="AI Phishing Detector - Hybrid ML & Heuristic Analysis."
     )
     parser.add_argument(
         "-t", "--text", type=str, help="Text message or email snippet to analyze."
@@ -89,14 +103,26 @@ def main():
 
     result = predict_message(content, model, vectorizer)
     
-    print("\n--- Analysis Result ---")
+    print("\n" + "=" * 45)
+    print("           ANALYSIS REPORT           ")
+    print("=" * 45)
     if result["is_phishing"]:
-        print("[ALERT] Status: PHISHING DETECTED")
-        print(f"[INFO]  Confidence: {result['confidence'] * 100:.2f}%")
-        print("[WARN]  Warning: Do not click any links or share sensitive credentials.")
+        print("[STATUS]     🚨 PHISHING DETECTED")
     else:
-        print("[OK]    Status: SAFE MESSAGE")
-        print(f"[INFO]  Confidence: {result['confidence'] * 100:.2f}%")
+        print("[STATUS]     ✅ SAFE MESSAGE")
+
+    print(f"[CONFIDENCE] {result['confidence'] * 100:.2f}%")
+    print(f"[RISK LEVEL] {result['risk_level']} (Score: {result['heuristic_score']}/100)")
+    
+    if result["flags"]:
+        print("\n[KEY RISK INDICATORS]")
+        for flag in result["flags"]:
+            print(f"  - {flag}")
+
+    if result["url_analysis"]["url_count"] > 0:
+        print(f"\n[URL SCAN]   Found {result['url_analysis']['url_count']} link(s)")
+
+    print("=" * 45)
 
 
 if __name__ == "__main__":
