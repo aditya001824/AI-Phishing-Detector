@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Phishing Detector | Secure Your Inbox</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>AI Phishing Detector | Intelligent Email & SMS Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta name="description" content="AI-powered tool to identify malicious and phishing emails instantly.">
+    <meta name="description" content="AI-powered tool to identify malicious and phishing emails with heuristic risk analysis.">
 </head>
 <body>
     <div class="background-orbs">
@@ -18,29 +18,42 @@
     <main class="container">
         <header class="app-header">
             <div class="logo-container">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shield-icon">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shield-icon">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
             </div>
-            <h1>Phish<span class="highlight">Guard</span></h1>
-            <p>AI-Powered Threat Detection</p>
+            <h1>Phish<span class="highlight">Guard</span> AI</h1>
+            <p>Next-Gen Phishing & Threat Intelligence</p>
         </header>
 
         <div class="card glass-panel">
+            <div class="sample-pills">
+                <span class="pill-label">Try sample:</span>
+                <button type="button" class="pill-btn" id="sample-phishing-1">🚨 Urgent Account</button>
+                <button type="button" class="pill-btn" id="sample-phishing-2">🎁 Prize Scam</button>
+                <button type="button" class="pill-btn" id="sample-safe">✅ Safe Meeting</button>
+            </div>
+
             <form id="phishing-form">
                 <div class="input-group">
-                    <label for="email-content">Analyze Email Content</label>
+                    <div class="label-row">
+                        <label for="email-content">Analyze Message Content</label>
+                        <span id="char-counter" class="char-count">0 characters</span>
+                    </div>
                     <textarea 
                         id="email-content" 
                         name="message" 
-                        placeholder="Paste the suspicious email contents here..."
+                        placeholder="Paste suspicious email text, SMS, or message here..."
                         required
                     ></textarea>
                 </div>
-                <button type="submit" id="analyze-btn">
-                    <span class="btn-text">Analyze Message</span>
-                    <div class="loader" id="btn-loader"></div>
-                </button>
+                <div class="button-group">
+                    <button type="submit" id="analyze-btn" class="primary-btn">
+                        <span class="btn-text">Analyze Message</span>
+                        <div class="loader" id="btn-loader"></div>
+                    </button>
+                    <button type="button" id="clear-btn" class="secondary-btn">Clear</button>
+                </div>
             </form>
         </div>
 
@@ -50,7 +63,25 @@
                     <!-- Icon injected via JS -->
                 </div>
                 <h2 id="result-title">Result Title</h2>
+                <div id="badge-container" class="badge-container"></div>
                 <p id="result-desc">Result details...</p>
+
+                <!-- Confidence Meter -->
+                <div class="meter-section">
+                    <div class="meter-label">
+                        <span>AI Confidence</span>
+                        <span id="confidence-val" class="confidence-val">0%</span>
+                    </div>
+                    <div class="meter-bar-bg">
+                        <div id="meter-bar-fill" class="meter-bar-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Risk Flags Section -->
+                <div id="risk-flags-section" class="risk-flags-section hidden">
+                    <h3>Risk Factor Analysis</h3>
+                    <ul id="risk-flags-list" class="risk-flags-list"></ul>
+                </div>
             </div>
         </div>
     </main>
