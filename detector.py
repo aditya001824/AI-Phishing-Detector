@@ -25,7 +25,7 @@ def predict_message(text: str, model=None, vectorizer=None):
     """
     Predict if a text message is phishing or safe.
     
-    Returns a dict with 'label' ('phishing' or 'safe') and 'confidence' float.
+    Returns a dict with 'label' ('phishing' or 'safe'), 'is_phishing' bool, and 'confidence' float.
     """
     if not text or not text.strip():
         raise ValueError("Input message cannot be empty.")
@@ -44,7 +44,7 @@ def predict_message(text: str, model=None, vectorizer=None):
 
     label = "phishing" if pred == 1 else "safe"
     return {
-        "label": label,
+        "result": label,
         "is_phishing": bool(pred == 1),
         "confidence": round(confidence, 4)
     }
@@ -65,12 +65,12 @@ def main():
     try:
         model, vectorizer = load_artifacts()
     except Exception as e:
-        print(f"❌ Error loading model: {e}", file=sys.stderr)
+        print(f"[ERROR] Loading model failed: {e}", file=sys.stderr)
         sys.exit(1)
 
     if args.file:
         if not os.path.exists(args.file):
-            print(f"❌ File not found: {args.file}", file=sys.stderr)
+            print(f"[ERROR] File not found: {args.file}", file=sys.stderr)
             sys.exit(1)
         with open(args.file, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
@@ -84,19 +84,19 @@ def main():
             sys.exit(0)
 
     if not content.strip():
-        print("⚠️ No input provided.")
+        print("[WARNING] No input provided.")
         sys.exit(1)
 
     result = predict_message(content, model, vectorizer)
     
     print("\n--- Analysis Result ---")
     if result["is_phishing"]:
-        print(f"🚨 Status: PHISHING DETECTED")
-        print(f"📊 Confidence: {result['confidence'] * 100:.2f}%")
-        print("⚠️  Warning: Do not click any links or share sensitive credentials.")
+        print("[ALERT] Status: PHISHING DETECTED")
+        print(f"[INFO]  Confidence: {result['confidence'] * 100:.2f}%")
+        print("[WARN]  Warning: Do not click any links or share sensitive credentials.")
     else:
-        print(f"✅ Status: SAFE MESSAGE")
-        print(f"📊 Confidence: {result['confidence'] * 100:.2f}%")
+        print("[OK]    Status: SAFE MESSAGE")
+        print(f"[INFO]  Confidence: {result['confidence'] * 100:.2f}%")
 
 
 if __name__ == "__main__":
