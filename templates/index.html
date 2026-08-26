@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Phishing Detector | Secure Your Inbox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="description" content="AI-powered tool to identify malicious and phishing emails instantly.">
+</head>
+<body>
+    <div class="background-orbs">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
+
+    <main class="container">
+        <header class="app-header">
+            <div class="logo-container">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shield-icon">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+            </div>
+            <h1>Phish<span class="highlight">Guard</span></h1>
+            <p>AI-Powered Threat Detection</p>
+        </header>
+
+        <div class="card glass-panel">
+            <form id="phishing-form">
+                <div class="input-group">
+                    <label for="email-content">Analyze Email Content</label>
+                    <textarea 
+                        id="email-content" 
+                        name="message" 
+                        placeholder="Paste the suspicious email contents here..."
+                        required
+                    ></textarea>
+                </div>
+                <button type="submit" id="analyze-btn">
+                    <span class="btn-text">Analyze Message</span>
+                    <div class="loader" id="btn-loader"></div>
+                </button>
+            </form>
+        </div>
+
+        <div id="result-container" class="result-wrapper hidden">
+            <div class="result-card" id="result-card">
+                <div class="result-icon" id="result-icon">
+                    <!-- Icon injected via JS -->
+                </div>
+                <h2 id="result-title">Result Title</h2>
+                <p id="result-desc">Result details...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
